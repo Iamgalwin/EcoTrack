@@ -161,7 +161,11 @@ def query_db(sql, args=(), one=False, commit=False):
         sql = sql.replace('%s', '?')
 
     c.execute(sql, args)
-    rows = c.fetchone() if one else c.fetchall()
+    # SELECT statements have a result set. INSERT/UPDATE/DELETE statements do not.
+    if c.description is not None:
+        rows = c.fetchone() if one else c.fetchall()
+    else:
+        rows = None
 
     if commit:
         conn.commit()
