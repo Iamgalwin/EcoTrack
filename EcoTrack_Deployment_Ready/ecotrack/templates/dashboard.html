@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- Top Summary Metric Cards -->
+<div class="grid-4">
+    <div class="card">
+        <div class="card-header-flex">
+            <span class="lbl">Monthly CO₂</span>
+            <div class="card-icon" style="color: var(--green);"><i class="fa-solid fa-cloud"></i></div>
+        </div>
+        <div class="val">{{ "%.1f"|format(monthly_co2) }} <span style="font-size: 0.9rem; color: var(--text-muted);">kg</span></div>
+        <span class="badge {{ rating.badge }}"><i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i> {{ rating.label }}</span>
+    </div>
+
+    <div class="card">
+        <div class="card-header-flex">
+            <span class="lbl">Est. Annual CO₂</span>
+            <div class="card-icon" style="color: #3b82f6;"><i class="fa-solid fa-smog"></i></div>
+        </div>
+        <div class="val">{{ "%.1f"|format(annual_co2) }} <span style="font-size: 0.9rem; color: var(--text-muted);">kg</span></div>
+        <span class="badge badge-gray">Annualized</span>
+    </div>
+
+    <div class="card">
+        <div class="card-header-flex">
+            <span class="lbl">Trees Required</span>
+            <div class="card-icon" style="color: #f59e0b;"><i class="fa-solid fa-seedling"></i></div>
+        </div>
+        <div class="val">{{ trees_required }} <span style="font-size: 0.9rem; color: var(--text-muted);">trees</span></div>
+        <span class="badge badge-amber">Offset Target</span>
+    </div>
+
+    <div class="card">
+        <div class="card-header-flex">
+            <span class="lbl">Active Plantations</span>
+            <div class="card-icon" style="color: #06b6d4;"><i class="fa-solid fa-tree"></i></div>
+        </div>
+        <div class="val">{{ active_trees }} <span style="font-size: 0.9rem; color: var(--text-muted);">/ {{ total_trees }}</span></div>
+        <span class="badge badge-green">Surviving</span>
+    </div>
+</div>
+
+<div class="grid-2">
+    <!-- Graph Monitor Widget -->
+    <div class="card">
+        <div class="card-header-flex" style="margin-bottom: 16px;">
+            <div>
+                <h3>Live Emission Monitor</h3>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">Monthly greenhouse gas consumption trajectory</div>
+            </div>
+            <span class="badge badge-green"><i class="fa-solid fa-chart-line"></i> Chart Active</span>
+        </div>
+        <div style="height: 250px; position: relative;">
+            <canvas id="dashChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Speedometer Carbon Rating Widget -->
+    <div class="card" style="text-align: center;">
+        <div class="card-header-flex" style="margin-bottom: 4px;">
+            <h3>Global Scale Emission Meter</h3>
+            <span class="badge {{ rating.badge }}">{{ rating.label }}</span>
+        </div>
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;">Compared to Global Per Capita Avg (~390 kg/mo)</div>
+
+        <!-- Speedometer Semi-Circle SVG -->
+        <div class="speedometer-container">
+            <svg class="speedometer-svg" viewBox="0 0 200 120">
+                <defs>
+                    <linearGradient id="speedometerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#10b981" />
+                        <stop offset="25%" stop-color="#22c55e" />
+                        <stop offset="55%" stop-color="#f59e0b" />
+                        <stop offset="80%" stop-color="#f97316" />
+                        <stop offset="100%" stop-color="#ef4444" />
+                    </linearGradient>
+                </defs>
+                <!-- Background Arc -->
+                <path class="speedometer-bg" d="M 20,100 A 80,80 0 0,1 180,100" />
+                <!-- Speedometer Value Fill Arc -->
+                <path id="speedo-fill" class="speedometer-fill" d="M 20,100 A 80,80 0 0,1 180,100" 
+                      stroke="url(#speedometerGradient)" 
+                      stroke-dasharray="251.32" 
+                      stroke-dashoffset="{{ 251.32 - (rating.pct / 100.0) * 251.32 }}" />
+            </svg>
+            <div class="speedometer-center">
+                <div style="font-size: 1.8rem; font-weight: 800; color: {{ rating.color }}; line-height: 1;">
+                    {{ "%.0f"|format(monthly_co2) }}
+                </div>
+                <div style="font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase;">kg CO₂ / month</div>
+            </div>
+        </div>
+
+        <!-- Rating Speedometer Color Scale Legend -->
+        <div class="scale-legend-bar">
+            <div class="scale-seg seg-dark-green" title="Very Low (<150)"></div>
+            <div class="scale-seg seg-light-green" title="Good (150-300)"></div>
+            <div class="scale-seg seg-yellow" title="Moderate (300-450)"></div>
+            <div class="scale-seg seg-orange" title="High (450-600)"></div>
+            <div class="scale-seg seg-red" title="Critical (>600)"></div>
+        </div>
+        <div class="scale-labels">
+            <span style="color: #10b981;">Very Low</span>
+            <span style="color: #22c55e;">Good</span>
+            <span style="color: #f59e0b;">Moderate</span>
+            <span style="color: #f97316;">High</span>
+            <span style="color: #ef4444;">Critical</span>
+        </div>
+
+        <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 12px; line-height: 1.4; background: var(--bg-input); padding: 8px; border-radius: 6px; border: 1px solid var(--border);">
+            {{ rating.desc }}
+        </p>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        renderChart('dashChart', {{ chart_labels|tojson }}, {{ chart_vals|tojson }});
+    });
+</script>
+{% endblock %}
+
+

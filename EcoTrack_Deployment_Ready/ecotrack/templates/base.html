@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoTrack - Carbon & Tree Offset Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+{% if session.get('user_id') %}
+<aside class="sidebar">
+    <div class="brand"><i class="fa-solid fa-leaf"></i> EcoTrack</div>
+    <nav class="nav">
+        <a href="/" class="{% if page == 'dashboard' %}active{% endif %}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+        <a href="/calculator" class="{% if page == 'calc' %}active{% endif %}"><i class="fa-solid fa-calculator"></i> Calculator</a>
+        <a href="/trees" class="{% if page == 'trees' %}active{% endif %}"><i class="fa-solid fa-tree"></i> Plantations</a>
+        <a href="/insights" class="{% if page == 'insights' %}active{% endif %}"><i class="fa-solid fa-robot"></i> AI Eco Insights</a>
+        <a href="/impact" class="{% if page == 'impact' %}active{% endif %}"><i class="fa-solid fa-book-open"></i> Env. Impact</a>
+        <a href="/logout" style="color: #ef4444; margin-top: auto;"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+
+    </nav>
+</aside>
+{% endif %}
+
+<main class="main" {% if not session.get('user_id') %}style="margin-left: 0;"{% endif %}>
+    {% if session.get('user_id') %}
+    <div class="top-bar">
+        <div>
+            <h2 style="font-size: 1.3rem; font-weight: 700; color: #fff;">Telemetry Overview</h2>
+            <div style="font-size: 0.78rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+                <span><i class="fa-regular fa-calendar"></i> <span id="current-date"></span></span>
+                <span>•</span>
+                <span><i class="fa-regular fa-clock"></i> <span id="current-time"></span></span>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="background: var(--bg-card); border: 1px solid var(--border); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-user-gear" style="color: var(--green);"></i> 
+                <span>{{ session.get('username') }}</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('en-US');
+        }
+        setInterval(updateClock, 1000);
+        document.addEventListener('DOMContentLoaded', updateClock);
+    </script>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for cat, msg in messages %}
+                <div class="alert alert-{{ cat }}">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</main>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

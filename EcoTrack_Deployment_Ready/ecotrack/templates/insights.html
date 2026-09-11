@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- 🤖 AI ECO INSIGHTS SEPARATE MODULE TEMPLATE -->
+<div class="card" style="margin-bottom: 24px; border-color: rgba(34, 197, 94, 0.3);">
+    <div class="card-header-flex" style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+        <div>
+            <h3 style="display: flex; align-items: center; gap: 10px; color: #fff; font-size: 1.3rem;">
+                <span style="font-size: 1.5rem;">🤖</span> AI ECO INSIGHTS
+            </h3>
+            <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 2px;">
+                Usage analysis, 3-month Linear Regression future emission forecasting & targeted recommendations
+            </div>
+        </div>
+        <span class="badge badge-green"><i class="fa-solid fa-microchip"></i> Scikit-Learn Model</span>
+    </div>
+
+    <!-- Overview Grid: Analysis & Prediction Summaries -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px;">
+        <!-- Current Analysis Card -->
+        <div style="background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; padding: 16px;">
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-chart-pie" style="color: var(--green);"></i> 1. Current Usage Analysis
+            </div>
+            <div style="font-size: 0.92rem; color: #fff; line-height: 1.5;">
+                {% if ai_insights.analysis.has_data %}
+                    "<strong>{{ ai_insights.analysis.largest_source }}</strong> is currently your largest emission source, contributing <strong>{{ ai_insights.analysis.largest_pct }}%</strong> of your total emissions. Overall historical trend is <strong>{{ ai_insights.analysis.trend }}</strong>."
+                {% else %}
+                    "No historical consumption recorded yet. Add monthly data using the Calculator to view usage analysis."
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Future Prediction Summary Card -->
+        <div style="background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; padding: 16px;">
+            <div style="font-size: 0.8rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-arrow-trend-up" style="color: #38bdf8;"></i> 2. Future Emission Prediction
+            </div>
+            <div style="font-size: 0.92rem; color: #fff; line-height: 1.5;">
+                {% if ai_insights.prediction.can_predict %}
+                    "{{ ai_insights.prediction.summary }}"
+                {% else %}
+                    "{{ ai_insights.prediction.message }}"
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart Section: Actual vs Predicted Emissions -->
+    <div style="margin-bottom: 24px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 10px; padding: 16px;">
+        <div style="font-size: 0.9rem; font-weight: 600; color: #fff; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span><i class="fa-solid fa-chart-line" style="color: #38bdf8;"></i> Actual Emissions vs Predicted Emissions</span>
+            {% if ai_insights.prediction.can_predict %}
+                <span class="badge badge-green">3-Month ML Forecast</span>
+            {% endif %}
+        </div>
+
+        {% if ai_insights.prediction.can_predict %}
+            <div style="height: 280px; position: relative;">
+                <canvas id="aiPagePredictionChart"></canvas>
+            </div>
+        {% else %}
+            <div style="padding: 40px 20px; text-align: center; color: var(--text-muted);">
+                <i class="fa-solid fa-database" style="font-size: 2rem; color: #f59e0b; margin-bottom: 12px;"></i>
+                <p style="font-size: 0.95rem; color: #fff; font-weight: 600;">More historical data is required to generate a reliable prediction.</p>
+                <p style="font-size: 0.82rem; margin-top: 6px;">Please log at least 2 monthly emission records in the Calculator to enable machine learning predictions.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Personalized Recommendations -->
+    <div style="margin-bottom: 12px;">
+        <h4 style="font-size: 0.95rem; color: var(--green); margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
+            <span>🌱</span> 3. Personalized Eco Recommendations
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            {% for rec in ai_insights.recommendations %}
+            <div style="background: var(--bg-input); border: 1px solid var(--border); padding: 12px 16px; border-radius: 8px; font-size: 0.88rem; display: flex; align-items: flex-start; gap: 14px;">
+                <div style="background: rgba(34, 197, 94, 0.18); color: var(--green); width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0;">
+                    {{ loop.index }}
+                </div>
+                <div style="color: var(--text); line-height: 1.5; margin-top: 2px;">{{ rec }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Model Disclaimer -->
+    <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 18px; padding-top: 10px; border-top: 1px dashed var(--border); text-align: right;">
+        <i class="fa-solid fa-triangle-exclamation" style="color: #f59e0b;"></i> Predictions are linear machine learning estimates based on user historical data and are not guaranteed results.
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        {% if ai_insights.prediction.can_predict %}
+            renderPredictionChart(
+                'aiPagePredictionChart',
+                {{ ai_insights.prediction.hist_labels|tojson }},
+                {{ ai_insights.prediction.hist_vals|tojson }},
+                {{ ai_insights.prediction.pred_labels|tojson }},
+                {{ ai_insights.prediction.pred_vals|tojson }}
+            );
+        {% endif %}
+    });
+</script>
+{% endblock %}

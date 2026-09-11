@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 0 auto;">
+    <h3 style="margin-bottom: 16px; color: var(--green);"><i class="fa-solid fa-calculator"></i> Carbon Calculator</h3>
+    <form action="/calculator" method="POST">
+        <div class="form-group"><label>Month & Year</label><input type="month" name="month_year" class="form-control" value="{{ month }}" required></div>
+        <div class="form-group"><label>Electricity (kWh)</label><input type="number" step="0.1" min="0" id="elec" name="elec" class="form-control" value="200" required></div>
+        <div class="form-group"><label>Vehicle Transport (km)</label><input type="number" step="0.1" min="0" id="trans_km" name="trans_km" class="form-control" value="300" required></div>
+        <div class="form-group">
+            <label>Vehicle Fuel Type</label>
+            <select id="trans_type" name="trans_type" class="form-control">
+                <option value="petrol">Petrol Car (0.192 kg CO₂/km)</option>
+                <option value="diesel">Diesel Car (0.171 kg CO₂/km)</option>
+                <option value="ev">Electric Vehicle (0.053 kg CO₂/km)</option>
+                <option value="bike">Two-Wheeler (0.045 kg CO₂/km)</option>
+            </select>
+        </div>
+        <div class="form-group"><label>LPG Cylinders (14.2kg)</label><input type="number" step="0.1" min="0" id="lpg" name="lpg" class="form-control" value="1" required></div>
+        <div class="form-group"><label>Household Waste (kg)</label><input type="number" step="0.1" min="0" id="waste" name="waste" class="form-control" value="25" required></div>
+
+        <div style="background: rgba(34,197,94,0.1); border: 1px solid var(--green); padding: 16px; border-radius: 8px; margin: 16px 0; text-align: center;">
+            <div class="lbl">Estimated Monthly CO₂</div>
+            <h2 id="prev-co2" style="color: var(--green);">0 kg</h2>
+        </div>
+
+        <button type="submit" class="btn">Calculate & Save Log</button>
+    </form>
+</div>
+{% endblock %}
