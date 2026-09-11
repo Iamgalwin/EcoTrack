@@ -242,8 +242,9 @@ def register():
             commit=True,
         )
         flash('Registered! Please login.', 'success')
-    except Exception:
-        flash('Username already exists or registration failed.', 'danger')
+    except Exception as exc:
+        app.logger.exception("Registration failed: %s", exc)
+        flash(f"Registration failed: {exc}", "danger")
     return redirect('/login')
 
 
